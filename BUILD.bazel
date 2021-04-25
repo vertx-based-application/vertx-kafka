@@ -1,0 +1,69 @@
+load(":version.bzl", "get_version", "get_name")
+
+# Library group
+java_library(
+    name = "all-external-targets",
+    srcs = glob(["**/src/main/java/**/*.java"]),
+    resources = glob(["**/src/main/resources/**"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@vertx_4_0_3//:io_vertx_vertx_core",
+        "@vertx_4_0_3//:io_vertx_vertx_rx_java2",
+        "@vertx_4_0_3//:io_vertx_vertx_web",
+        "@vertx_4_0_3//:io_vertx_vertx_web_client",
+
+#        "@vertx_4_0_3//:io_reactivex_rxjava2_rxjava",
+#        "@vertx_4_0_3//:org_reactivestreams_reactive_streams",
+
+        "@vertx_4_0_3//:io_vertx_vertx_sql_client",
+        "@vertx_4_0_3//:io_vertx_vertx_pg_client",
+        "@vertx_4_0_3//:io_vertx_vertx_kafka_client",
+        "@maven//:org_postgresql_postgresql",
+        "@maven//:org_slf4j_slf4j_api",
+        "@maven//:org_slf4j_slf4j_simple",
+        "@maven//:org_apache_logging_log4j_log4j_core",
+        "@maven//:org_apache_logging_log4j_log4j_api",
+        "@maven//:org_apache_logging_log4j_log4j_slf4j_impl",
+        "@maven//:org_apache_kafka_kafka_clients",
+    ],
+    exports = [
+        "@vertx_4_0_3//:io_vertx_vertx_core",
+    ],
+)
+
+# Generate Service
+java_binary(
+    name = "service",
+    main_class = "com.trl.vertex_kafka.Main",
+    visibility = ["//visibility:public"],
+    runtime_deps = [":all-external-targets"]
+)
+
+# Compile Test Code
+java_library(
+    name = "all-test-targets",
+    srcs = glob(["**/src/test/java/**/*.java"]),
+    resources = glob(["**/src/main/resources/**"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":all-external-targets",
+        "@maven_test//:io_vertx_vertx_junit5",
+        "@maven_test//:org_junit_jupiter_junit_jupiter_api",
+        "@maven_test//:org_junit_jupiter_junit_jupiter_engine",
+        "@maven_test//:org_junit_platform_junit_platform_console",
+        "@maven_test//:org_assertj_assertj_core",
+    ],
+)
+
+# Execute tests
+java_test(
+     name = "tests",
+     size = "small",
+     args = ["--select-package=com.trl.vertex_kafka"],
+     use_testrunner = False,
+     main_class = "org.junit.platform.console.ConsoleLauncher",
+     visibility = ["//visibility:public"],
+     runtime_deps = [
+        ":all-test-targets"
+     ],
+)
